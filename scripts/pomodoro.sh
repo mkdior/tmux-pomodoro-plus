@@ -4,14 +4,15 @@ CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 POMODORO_DIR="/tmp"
 POMODORO_FILE="$POMODORO_DIR/pomodoro.txt"
 POMODORO_STATUS_FILE="$POMODORO_DIR/pomodoro_status.txt"
-POMODORO_INTERVAL_FILE="$POMODORO_DIR/pomodoro_interval.txt"
+POMODORO_INTERVALS_FILE="$POMODORO_DIR/pomodoro_interval.txt"
 POMODORO_MINS_FILE="$CURRENT_DIR/user_mins.txt"
 POMODORO_BREAK_MINS_FILE="$CURRENT_DIR/user_break_mins.txt"
 POMODORO_LONG_BREAK_MINS_FILE="$CURRENT_DIR/user_long_break_mins.txt"
 
 pomodoro_duration_minutes="@pomodoro_mins"
 pomodoro_break_minutes="@pomodoro_break_mins"
-pomodoro_long_break_minutes="@pomodoro_break_mins"
+pomodoro_long_break_minutes="@pomodoro_long_break_mins"
+pomodoro_interval="@pomodoro_interval"
 pomodoro_auto_restart="@pomodoro_auto_restart"
 pomodoro_on="@pomodoro_on"
 pomodoro_complete="@pomodoro_complete"
@@ -35,6 +36,10 @@ get_pomodoro_break() {
 
 get_pomodoro_long_break() {
 	get_tmux_option "$pomodoro_long_break_minutes" "20"
+}
+
+get_pomodoro_interval() {
+	get_tmux_option "$pomodoro_interval" "4"
 }
 
 get_pomodoro_auto_restart() {
@@ -111,7 +116,7 @@ send_notification() {
 clean_env() {
 	remove_file "$POMODORO_FILE"
 	remove_file "$POMODORO_STATUS_FILE"
-	remove_file "$POMODORO_INTERVAL_FILE"
+	remove_file "$POMODORO_INTERVALS_FILE"
 }
 
 pomodoro_toggle() {
@@ -127,7 +132,7 @@ pomodoro_start() {
 	clean_env
 	mkdir -p $POMODORO_DIR
 	write_to_file "$(get_seconds)" "$POMODORO_FILE"
-  write_to_file 0 "$POMODORO_INTERVAL_FILE"
+  write_to_file 0 "$POMODORO_INTERVALS_FILE"
 
 	send_notification "🍅 Pomodoro started!" "Your Pomodoro is underway"
 	if_inside_tmux && tmux refresh-client -S
@@ -145,14 +150,16 @@ pomodoro_cancel() {
 
 pomodoro_custom() {
 	tmux command-prompt \
-		-I "$(get_pomodoro_duration), $(get_pomodoro_break), $(get_long_pomodoro_break)" \
-		-p 'Pomodoro duration (mins):, Break duration (mins):, Long Break duration (mins)' \
+		-I "$(get_pomodoro_duration), $(get_pomodoro_break), $(get_long_pomodoro_break), $(get_pomodoro_interval)" \
+		-p 'Pomodoro duration (mins):, Break duration (mins):, Long Break duration (mins), Intervals' \
 		"set -g @pomodoro_mins %1;
 		 set -g @pomodoro_break_mins %2;
 		 set -g @pomodoro_long_break_mins %3;
+		 set -g @pomodoro_interval %4;
 		 run-shell 'echo %1 > $POMODORO_MINS_FILE';
 		 run-shell 'echo %2 > $POMODORO_BREAK_MINS_FILE'
 		 run-shell 'echo %3 > $POMODORO_LONG_BREAK_MINS_FILE'
+		 run-shell 'echo %4 > $POMODORO_INTERVALS_FILE'
 		"
 }
 

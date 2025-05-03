@@ -2,10 +2,11 @@
 # ______________________________________________________________| locals |__ ;
 
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 POMODORO_MINS_FILE="$CURRENT_DIR/scripts/user_mins.txt"
 POMODORO_BREAK_MINS_FILE="$CURRENT_DIR/scripts/user_break_mins.txt"
 POMODORO_LONG_BREAK_MINS_FILE="$CURRENT_DIR/scripts/user_long_break_mins.txt"
-POMODORO_INTERVAL_FILE="$CURRENT_DIR/scripts/interval.txt"
+POMODORO_INTERVALS_FILE="$CURRENT_DIR/scripts/interval.txt"
 
 default_start_pomodoro="p"
 start_pomodoro="@pomodoro_start"
@@ -27,13 +28,13 @@ sync_timers() {
 		remove_file "$POMODORO_MINS_FILE"
 		remove_file "$POMODORO_BREAK_MINS_FILE"
 		remove_file "$POMODORO_LONG_BREAK_MINS_FILE"
-		remove_file "$POMODORO_INTERVAL_FILE"
+		remove_file "$POMODORO_INTERVALS_FILE"
 
-	elif files_exist "$POMODORO_MINS_FILE" "$POMODORO_BREAK_MINS_FILE" "$POMODORO_LONG_BREAK_MINS_FILE" "$POMODORO_INTERVAL_FILE"; then
+	elif files_exist "$POMODORO_MINS_FILE" "$POMODORO_BREAK_MINS_FILE" "$POMODORO_LONG_BREAK_MINS_FILE" "$POMODORO_INTERVALS_FILE"; then
 		set_tmux_option "@pomodoro_mins $(read_file "$POMODORO_MINS_FILE")"
 		set_tmux_option "@pomodoro_break_mins $(read_file "$POMODORO_BREAK_MINS_FILE")"
 		set_tmux_option "@pomodoro_long_break_mins $(read_file "$POMODORO_LONG_BREAK_MINS_FILE")"
-		set_tmux_option "@pomodoro_interval $(read_file "$POMODORO_INTERVAL_FILE")"
+		set_tmux_option "@pomodoro_interval $(read_file "$POMODORO_INTERVALS_FILE")"
 	fi
 }
 

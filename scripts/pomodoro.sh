@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 # ______________________________________________________________| locals |__ ;
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 POMODORO_DIR="/tmp"
+
 POMODORO_FILE="$POMODORO_DIR/pomodoro.txt"
 POMODORO_STATUS_FILE="$POMODORO_DIR/pomodoro_status.txt"
-POMODORO_INTERVALS_FILE="$POMODORO_DIR/pomodoro_interval.txt"
+
 POMODORO_MINS_FILE="$CURRENT_DIR/user_mins.txt"
 POMODORO_BREAK_MINS_FILE="$CURRENT_DIR/user_break_mins.txt"
 POMODORO_LONG_BREAK_MINS_FILE="$CURRENT_DIR/user_long_break_mins.txt"
+POMODORO_INTERVALS_FILE="$CURRENT_DIR/pomodoro_interval.txt"
 
 pomodoro_duration_minutes="@pomodoro_mins"
 pomodoro_break_minutes="@pomodoro_break_mins"
@@ -215,7 +218,11 @@ pomodoro_status() {
 
 	if [ "$pomodoro_start_time" -eq -1 ]; then
 		echo ""
-    # If current session length is equal to or greater than session length + break
+  # Start is never cleaned, so if we started our pomodoro at 12:05, the
+  # duration is 15 minutes, when our break starts, it would be the duration
+  # from 12:05 to 12:20. So if we ever enter this check, it means we've passed
+  # the length of a whole session + a break. Which in turn means that we've
+  # done one iteration.
 	elif [ $difference -ge "$(minutes_to_seconds $(($(get_pomodoro_duration) + $(get_pomodoro_break))))" ]; then
 		pomodoro_start_time=-1
 		echo ""
@@ -240,7 +247,9 @@ pomodoro_status() {
 
 		pomodoro_duration_secs=$(minutes_to_seconds "$(get_pomodoro_duration)")
 		break_duration_seconds=$(minutes_to_seconds "$(get_pomodoro_break)")
+
 		time_left_seconds=$((-(difference - pomodoro_duration_secs - break_duration_seconds)))
+
 		time_left_formatted=$(format_seconds $time_left_seconds)
 
 		printf "$(get_tmux_option "$pomodoro_complete" "$pomodoro_complete_default")$time_left_formatted "
